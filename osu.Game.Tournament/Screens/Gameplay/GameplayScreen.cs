@@ -48,6 +48,8 @@ namespace osu.Game.Tournament.Screens.Gameplay
 
         private Drawable chroma = null!;
 
+        protected override bool FetchDataFromMemoryThisScreen => true;
+
         [BackgroundDependencyLoader]
         private void load(MatchIPCInfo ipc, TournamentConfigManager config)
         {
