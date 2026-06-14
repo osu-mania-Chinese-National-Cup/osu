@@ -225,7 +225,7 @@ namespace osu.Game.Tournament.Screens.Gameplay
 
         private TourneyState lastState;
         private MatchHeader header = null!;
-        private FourTeamScoreDisplay fourTeamScoreDisplay;
+        private FourTeamScoreDisplay fourTeamScoreDisplay = null!;
         private SettingsNumberBox? frameRateInputBox;
 
         private void contract()
