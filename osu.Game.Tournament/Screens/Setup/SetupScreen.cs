@@ -203,7 +203,7 @@ namespace osu.Game.Tournament.Screens.Setup
                 {
                     Label = "Current newest commit",
                     ButtonText = "Open repo",
-                    Action = () => { host.OpenUrlExternally($"https://github.com/{GithubConfig.Owner}/{GithubConfig.Repo}/{GithubConfig.BaseBranch}"); },
+                    Action = () => { host.OpenUrlExternally($"https://github.com/{GithubConfig.Owner}/{GithubConfig.Repo}/repo/{GithubConfig.BaseBranch}"); },
                 }
             };
 
