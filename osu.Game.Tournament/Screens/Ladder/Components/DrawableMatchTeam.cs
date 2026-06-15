@@ -147,13 +147,21 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
 
         protected override bool OnClick(ClickEvent e)
         {
-            if (Team == null || editorInfo != null) return false;
-
             if (!match.Current.Value)
             {
                 setCurrent();
                 return true;
             }
+
+            if (e.Button == MouseButton.Left)
+            {
+                if (score.Value == null)
+                {
+                    match.StartMatch();
+                }
+            }
+
+            if (Team == null || editorInfo != null) return false;
 
             if (e.Button == MouseButton.Left)
             {

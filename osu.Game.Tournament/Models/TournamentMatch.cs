@@ -137,8 +137,17 @@ namespace osu.Game.Tournament.Models
         /// </summary>
         public void CancelMatchStart()
         {
-            Team1Score.Value = null;
-            Team2Score.Value = null;
+            if (StructureType.Value == MatchStructureType.HeadToHead)
+            {
+                Team1Score.Value = null;
+                Team2Score.Value = null;
+                return;
+            }
+
+            foreach (var slot in TeamSlots)
+            {
+                slot.Score.Value = null;
+            }
         }
 
         /// <summary>
@@ -146,6 +155,16 @@ namespace osu.Game.Tournament.Models
         /// </summary>
         public void StartMatch()
         {
+            if (StructureType.Value == MatchStructureType.FourTeams)
+            {
+                foreach (var slot in TeamSlots)
+                {
+                    slot.Score.Value = 0;
+                }
+
+                return;
+            }
+
             if (Team1.Value == null || Team2.Value == null)
                 return;
 
@@ -163,6 +182,7 @@ namespace osu.Game.Tournament.Models
             Team2.Value = null;
             Completed.Value = false;
             PicksBans.Clear();
+            TeamSlots.Clear();
         }
 
         public TournamentTeam? GetTeamByColor(TeamColour colour)

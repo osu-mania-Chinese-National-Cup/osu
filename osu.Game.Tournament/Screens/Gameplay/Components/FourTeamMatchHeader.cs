@@ -7,10 +7,12 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Tournament.Components;
 using osu.Game.Tournament.Models;
 using osuTK;
+using osuTK.Input;
 
 namespace osu.Game.Tournament.Screens.Gameplay.Components
 {
@@ -33,15 +35,20 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
         {
             currentMatch.BindValueChanged(m =>
             {
+                if (m.OldValue != null)
+                {
+                    slot.UnbindBindings();
+                }
+
                 if (m.NewValue == null || m.NewValue.StructureType.Value != MatchStructureType.FourTeams)
                 {
                     Hide();
-                    slot.UnbindBindings();
                     return;
                 }
 
                 Show();
                 slot.BindTo(m.NewValue.TeamSlots);
+                m.NewValue.StartMatch();
             });
 
             slot.BindCollectionChanged((_, _) =>
@@ -175,7 +182,7 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                                         {
                                             Anchor = Anchor.Centre,
                                             Origin = Anchor.Centre,
-                                            Text = "10"
+                                            Text = "??"
                                         }
                                     }
                                 }
@@ -188,7 +195,24 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                 {
                     scoreText.Text = s.NewValue.ToString() ?? string.Empty;
                 });
-                slot.Score.BindTo(currentTeamScore);
+                currentTeamScore.BindTo(slot.Score);
+            }
+
+            protected override bool OnMouseDown(MouseDownEvent e)
+            {
+                switch (e.Button)
+                {
+                    case MouseButton.Left:
+                        currentTeamScore.Value++;
+                        return true;
+
+                    case MouseButton.Right:
+                        if (currentTeamScore.Value > 0)
+                            currentTeamScore.Value--;
+                        return true;
+                }
+
+                return base.OnMouseDown(e);
             }
         }
     }
