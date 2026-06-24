@@ -11,7 +11,6 @@ using osu.Game.Configuration;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Localisation;
 using osu.Game.Online.Multiplayer;
-using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Updater;
 
