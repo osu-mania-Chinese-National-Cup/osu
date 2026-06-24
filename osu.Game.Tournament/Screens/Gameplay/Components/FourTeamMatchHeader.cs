@@ -6,7 +6,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Tournament.Components;
@@ -100,8 +99,8 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                             },
                         }
                     },
-                    new TeamDisplay(slot.FirstOrDefault(s => s.Colour.Value == TeamColour.Yellow)),
-                    new TeamDisplay(slot.FirstOrDefault(s => s.Colour.Value == TeamColour.Green)),
+                    new TeamDisplay(slot.FirstOrDefault(s => s.Colour.Value == TeamColour.Yellow), true),
+                    new TeamDisplay(slot.FirstOrDefault(s => s.Colour.Value == TeamColour.Green), true),
                 }
             };
         }
@@ -109,16 +108,19 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
         private partial class TeamDisplay : DrawableTournamentTeam
         {
             private readonly TournamentMatchSlot? slot;
+            private readonly bool rightSide;
             private readonly Bindable<int?> currentTeamScore = new Bindable<int?>();
 
-            private TournamentSpriteText scoreText = null!;
+            private TournamentSpriteTextWithBackground scoreText = null!;
+            private TournamentSpriteTextWithBackground seedText = null!;
 
-            public TeamDisplay(TournamentMatchSlot? slot)
+            public TeamDisplay(TournamentMatchSlot? slot, bool rightSide = false)
                 : base(slot?.Team.Value)
             {
                 Height = 95;
                 Width = 300;
                 this.slot = slot;
+                this.rightSide = rightSide;
                 Anchor = Anchor.TopCentre;
                 Origin = Anchor.TopCentre;
 
@@ -134,55 +136,73 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
 
                 InternalChildren = new Drawable[]
                 {
-                    new Box
+                    new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Colour = TournamentGame.GetTeamColour(slot.Colour.Value),
-                    },
-                    new GridContainer
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        ColumnDimensions = new[]
+                        Direction = FillDirection.Horizontal,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Children = new Drawable[]
                         {
-                            new Dimension(GridSizeMode.AutoSize),
-                            new Dimension()
-                        },
-                        Content = new[]
-                        {
-                            new Drawable[]
+                            Flag.With(f =>
                             {
-                                Flag.With(f =>
+                                f.Margin = new MarginPadding(10);
+                                f.Anchor = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight;
+                                f.Origin = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight;
+                                f.BorderColour = TournamentGame.GetTeamColour(slot.Colour.Value);
+                                f.BorderThickness = 5;
+                            }),
+                            new FillFlowContainer
+                            {
+                                RelativeSizeAxes = Axes.Y,
+                                AutoSizeAxes = Axes.X,
+                                Anchor = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                Origin = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(10),
+                                Children = new Drawable[]
                                 {
-                                    f.Margin = new MarginPadding(10);
-                                    f.Anchor = Anchor.CentreLeft;
-                                    f.Origin = Anchor.CentreLeft;
-                                }),
-                                new FillFlowContainer
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Anchor = Anchor.CentreRight,
-                                    Origin = Anchor.CentreRight,
-                                    Direction = FillDirection.Vertical,
-                                    Spacing = new Vector2(10),
-                                    Children = new Drawable[]
+                                    new TournamentSpriteTextWithBackground(Team?.FullName.Value ?? "???")
                                     {
-                                        new TournamentSpriteTextWithBackground(Team?.FullName.Value ?? "???")
+                                        Anchor = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                        Origin = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                        Text =
                                         {
                                             Anchor = Anchor.Centre,
                                             Origin = Anchor.Centre,
-                                            Text =
-                                            {
-                                                Anchor = Anchor.Centre,
-                                                Origin = Anchor.Centre,
-                                                Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 20),
-                                                Padding = new MarginPadding { Left = 10, Right = 10 },
-                                            },
+                                            Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 20),
+                                            Padding = new MarginPadding { Left = 10, Right = 10 },
                                         },
-                                        scoreText = new TournamentSpriteText
+                                    },
+                                    new FillFlowContainer
+                                    {
+                                        AutoSizeAxes = Axes.Both,
+                                        Anchor = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                        Origin = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                        Direction = FillDirection.Horizontal,
+                                        Spacing = new Vector2(10),
+                                        Children = new Drawable[]
                                         {
-                                            Anchor = Anchor.Centre,
-                                            Origin = Anchor.Centre,
-                                            Text = "??"
+                                            seedText = new TournamentSpriteTextWithBackground($"#{Team?.Seed.Value ?? "seed"}")
+                                            {
+                                                Anchor = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                                Origin = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                                Text =
+                                                {
+                                                    Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 20),
+                                                    Padding = new MarginPadding { Left = 10, Right = 10 },
+                                                },
+                                            },
+                                            scoreText = new TournamentSpriteTextWithBackground("??")
+                                            {
+                                                Anchor = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                                Origin = !rightSide ? Anchor.CentreLeft : Anchor.CentreRight,
+                                                Text =
+                                                {
+                                                    Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 20),
+                                                    Padding = new MarginPadding { Left = 10, Right = 10 },
+                                                },
+                                            }
                                         }
                                     }
                                 }
@@ -193,9 +213,16 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
 
                 currentTeamScore.BindValueChanged(s =>
                 {
-                    scoreText.Text = s.NewValue.ToString() ?? string.Empty;
+                    scoreText.Text.Text = s.NewValue.ToString() ?? string.Empty;
                 });
                 currentTeamScore.BindTo(slot.Score);
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+
+                Flag.CornerRadius = 0;
             }
 
             protected override bool OnMouseDown(MouseDownEvent e)
