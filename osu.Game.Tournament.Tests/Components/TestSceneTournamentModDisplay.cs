@@ -52,7 +52,7 @@ namespace osu.Game.Tournament.Tests.Components
 
             foreach (var mod in mods)
             {
-                fillFlow.Add(new TournamentBeatmapPanel(new TournamentBeatmap(beatmap), mod.Acronym)
+                fillFlow.Add(new TournamentBeatmapPanel(new TournamentBeatmap(beatmap))
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre

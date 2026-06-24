@@ -10,6 +10,11 @@ namespace osu.Game.Tournament.Tests.Components
 {
     public partial class TestSceneFourTeamMatchHeader : TournamentTestScene
     {
+        public override void SetUpSteps()
+        {
+            // 不要 set current match
+        }
+
         public TestSceneFourTeamMatchHeader()
         {
             var teamList = new BindableList<TournamentMatchSlot>(new[]
@@ -30,7 +35,7 @@ namespace osu.Game.Tournament.Tests.Components
         private TournamentTeam getTeam() => new TournamentTeam
         {
             FlagName = { Value = "1" },
-            FullName = { Value = "Test" },
+            FullName = { Value = "Test Team Name" },
             Seed = { Value = "#5" },
             Players =
             {
