@@ -204,10 +204,10 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
         }
 
         [Resolved]
-        private BracketUploader bracketUploader { get; set; } = null!;
+        private BracketUploader? bracketUploader { get; set; } = null!;
 
         [Resolved]
-        private IDialogOverlay dialogOverlay { get; set; } = null!;
+        private IDialogOverlay? dialogOverlay { get; set; } = null!;
 
         public MenuItem[] ContextMenuItems
         {
@@ -223,12 +223,12 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
                     new OsuMenuItem("Join with (loser)", MenuItemType.Standard, () => ladderEditor.BeginJoin(match, true)),
                     new OsuMenuItem("Upload this match", MenuItemType.Standard, () =>
                     {
-                        bracketUploader.UploadByMatchAsync(match).ContinueWith(t =>
+                        bracketUploader?.UploadByMatchAsync(match).ContinueWith(t =>
                         {
                             if (t.IsCompletedSuccessfully)
                                 return;
 
-                            Scheduler.Add(() => dialogOverlay.Push(new UploadFailedDialog(t.Exception?.Message)));
+                            Scheduler.Add(() => dialogOverlay?.Push(new UploadFailedDialog(t.Exception?.Message)));
                             Logger.Error(t.Exception, "Upload match failed");
                         }).ConfigureAwait(false);
                     }),
