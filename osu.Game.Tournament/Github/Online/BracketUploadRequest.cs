@@ -61,6 +61,9 @@ namespace osu.Game.Tournament.Github.Online
             if (!string.IsNullOrWhiteSpace(providedUsername))
                 req.AddHeader("X-Osu-Username", providedUsername);
 
+            // 上传到github可能有延迟
+            req.Timeout = 60_000;
+
             return req;
         }
 
