@@ -262,7 +262,7 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
 
             // todo: teams may need to be bindable for transitions at a later point.
 
-            if (Match.Team1.Value == null || Match.Team2.Value == null)
+            if ((Match.Team1.Value == null || Match.Team2.Value == null) && Match.StructureType.Value == MatchStructureType.HeadToHead)
                 Match.CancelMatchStart();
 
             if (Match.ConditionalMatches.Count > 0)
