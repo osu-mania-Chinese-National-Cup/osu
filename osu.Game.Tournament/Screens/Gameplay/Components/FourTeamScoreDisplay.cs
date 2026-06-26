@@ -124,7 +124,7 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                                         Padding = new MarginPadding { Horizontal = 5f },
                                         Anchor = Anchor.CentreRight,
                                         Origin = Anchor.CentreRight,
-                                        Text = $"Team {colour} but veryyyyyyy long",
+                                        Text = $"Team {colour}",
                                         Font = OsuFont.Torus.With(weight: FontWeight.Bold),
                                         MaxWidth = 110,
                                     }
