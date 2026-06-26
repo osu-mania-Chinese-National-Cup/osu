@@ -138,6 +138,7 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                 {
                     new FillFlowContainer
                     {
+                        Padding = new MarginPadding { Horizontal = 28f },
                         RelativeSizeAxes = Axes.Both,
                         Direction = FillDirection.Horizontal,
                         Anchor = Anchor.Centre,
