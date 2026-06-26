@@ -25,5 +25,21 @@ namespace osu.Game.Tournament.IPC
         public BindableInt MaxCombo { get; } = new BindableInt();
 
         public BindableInt Score { get; } = new BindableInt();
+
+        public void Reset()
+        {
+            OnlineID.Value = -1;
+            Mods.Value = 0;
+            Accuracy.Value = 0;
+            Hit100.Value = 0;
+            Hit300.Value = 0;
+            Hit50.Value = 0;
+            HitGeki.Value = 0;
+            HitKatu.Value = 0;
+            HitMiss.Value = 0;
+            Combo.Value = 0;
+            MaxCombo.Value = 0;
+            Score.Value = 0;
+        }
     }
 }

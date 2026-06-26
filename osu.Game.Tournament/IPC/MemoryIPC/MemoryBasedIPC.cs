@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Logging;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Online.API;
@@ -96,6 +97,7 @@ namespace osu.Game.Tournament.IPC.MemoryIPC
             try
             {
                 State.Value = reader.GetTourneyState();
+
                 LegacyMods mods = Mods.Value = reader.GetMods();
 
                 int beatmapId = reader.GetBeatmapId();
@@ -281,6 +283,12 @@ namespace osu.Game.Tournament.IPC.MemoryIPC
 
                     case AttachStatus.Attached:
                     {
+                        if (State.Value != TourneyState.Playing)
+                        {
+                            SlotPlayers.ForEach(s => s.Reset());
+                            return;
+                        }
+
                         if (!FetchDataFromMemory)
                             return;
 
