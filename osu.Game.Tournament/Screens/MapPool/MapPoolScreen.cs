@@ -187,6 +187,12 @@ namespace osu.Game.Tournament.Screens.MapPool
             if (CurrentMatch.Value?.Round.Value == null)
                 return;
 
+            if (CurrentMatch.Value.StructureType.Value == MatchStructureType.FourTeams)
+            {
+                fourTeamsSetNextMode();
+                return;
+            }
+
             int totalBansRequired = CurrentMatch.Value.Round.Value.BanCount.Value * 2;
 
             TeamColour lastPickColour = CurrentMatch.Value.PicksBans.LastOrDefault()?.Team ?? TeamColour.Red;
@@ -218,6 +224,17 @@ namespace osu.Game.Tournament.Screens.MapPool
             setMode(nextColour, hasAllBans ? ChoiceType.Pick : ChoiceType.Ban);
 
             TeamColour getOppositeTeamColour(TeamColour colour) => colour == TeamColour.Red ? TeamColour.Blue : TeamColour.Red;
+        }
+
+        private void fourTeamsSetNextMode()
+        {
+            if (CurrentMatch.Value?.Round.Value == null)
+                return;
+
+            TeamColour lastPickColour = CurrentMatch.Value.PicksBans.LastOrDefault()?.Team ?? TeamColour.Red;
+            TeamColour nextColour = (TeamColour)(((int)lastPickColour + 1) % 4);
+
+            setMode(nextColour, ChoiceType.Pick);
         }
 
         protected override bool OnMouseDown(MouseDownEvent e)
