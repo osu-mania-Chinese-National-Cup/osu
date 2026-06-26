@@ -209,24 +209,19 @@ namespace osu.Game.Tournament
                 // assign teams
                 foreach (var match in ladder.Matches)
                 {
-                    if (match.StructureType.Value == MatchStructureType.HeadToHead)
-                    {
-                        match.Team1.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == match.Team1Acronym);
-                        match.Team2.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == match.Team2Acronym);
+                    match.Team1.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == match.Team1Acronym);
+                    match.Team2.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == match.Team2Acronym);
 
-                        foreach (var conditional in match.ConditionalMatches)
-                        {
-                            conditional.Team1.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == conditional.Team1Acronym);
-                            conditional.Team2.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == conditional.Team2Acronym);
-                            conditional.Round.Value = match.Round.Value;
-                        }
-                    }
-                    else
+                    foreach (var conditional in match.ConditionalMatches)
                     {
-                        foreach (var slot in match.TeamSlots)
-                        {
-                            slot.Team.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == slot.TeamAcronym);
-                        }
+                        conditional.Team1.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == conditional.Team1Acronym);
+                        conditional.Team2.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == conditional.Team2Acronym);
+                        conditional.Round.Value = match.Round.Value;
+                    }
+
+                    foreach (var slot in match.TeamSlots)
+                    {
+                        slot.Team.Value = ladder.Teams.FirstOrDefault(t => t.Acronym.Value == slot.TeamAcronym);
                     }
                 }
 
