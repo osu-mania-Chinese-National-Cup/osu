@@ -137,12 +137,8 @@ namespace osu.Game.Tournament.Models
         /// </summary>
         public void CancelMatchStart()
         {
-            if (StructureType.Value == MatchStructureType.HeadToHead)
-            {
-                Team1Score.Value = null;
-                Team2Score.Value = null;
-                return;
-            }
+            Team1Score.Value = null;
+            Team2Score.Value = null;
 
             foreach (var slot in TeamSlots)
             {
@@ -155,14 +151,9 @@ namespace osu.Game.Tournament.Models
         /// </summary>
         public void StartMatch()
         {
-            if (StructureType.Value == MatchStructureType.FourTeams)
+            foreach (var slot in TeamSlots)
             {
-                foreach (var slot in TeamSlots)
-                {
-                    slot.Score.Value = 0;
-                }
-
-                return;
+                slot.Score.Value = 0;
             }
 
             if (Team1.Value == null || Team2.Value == null)
