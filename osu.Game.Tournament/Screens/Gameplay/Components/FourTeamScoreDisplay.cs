@@ -69,7 +69,7 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
 
             private Container scoreBox = null!;
             private ScoreCounter scoreCounter = null!;
-            private TournamentSpriteText teamNameText = null!;
+            private OsuSpriteText teamNameText = null!;
 
             public TeamScoreDisplay(TeamColour colour)
             {
@@ -107,7 +107,7 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                         RelativeSizeAxes = Axes.Both,
                         ColumnDimensions = new[]
                         {
-                            new Dimension(GridSizeMode.Absolute, 100),
+                            new Dimension(GridSizeMode.Absolute, 120),
                             new Dimension(GridSizeMode.Distributed),
                         },
                         Content = new[]
@@ -116,12 +116,17 @@ namespace osu.Game.Tournament.Screens.Gameplay.Components
                             {
                                 new Container
                                 {
-                                    AutoSizeAxes = Axes.Both,
+                                    RelativeSizeAxes = Axes.Both,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
-                                    Child = teamNameText = new TournamentSpriteText
+                                    Child = teamNameText = new TruncatingSpriteText
                                     {
-                                        Text = $"Team {colour}"
+                                        Padding = new MarginPadding { Horizontal = 5f },
+                                        Anchor = Anchor.CentreRight,
+                                        Origin = Anchor.CentreRight,
+                                        Text = $"Team {colour} but veryyyyyyy long",
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Bold),
+                                        MaxWidth = 110,
                                     }
                                 },
                                 new FillFlowContainer
