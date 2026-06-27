@@ -243,7 +243,7 @@ namespace osu.Game.Tournament.Screens.Gameplay
         private MatchHeader header = null!;
         private FourTeamScoreDisplay fourTeamScoreDisplay = null!;
         private SettingsNumberBox? frameRateInputBox;
-        private LabelledNumberBox chatChannelTextBox;
+        private LabelledNumberBox chatChannelTextBox = null!;
 
         private void contract()
         {
@@ -312,14 +312,38 @@ namespace osu.Game.Tournament.Screens.Gameplay
                     }
                     else if (CurrentMatch.Value.StructureType.Value == MatchStructureType.FourTeams)
                     {
+                        var teamColours = new[]
+                        {
+                            TeamColour.Red,
+                            TeamColour.Blue,
+                            TeamColour.Yellow,
+                            TeamColour.Green,
+                        };
+
+                        var seedByColour = teamColours
+                            .ToDictionary(
+                                colour => colour,
+                                colour =>
+                                {
+                                    string? seedValue = CurrentMatch.Value.TeamSlots
+                                                                    .FirstOrDefault(s => s.Colour.Value == colour)
+                                                                    ?.Team.Value
+                                                                    ?.Seed.Value;
+
+                                    return int.TryParse(seedValue, out int seed)
+                                        ? seed
+                                        : int.MaxValue;
+                                });
+
                         var rankableScores = new[]
                                              {
                                                  (Score: ipc.Score1.Value, Colour: TeamColour.Red),
                                                  (Score: ipc.Score2.Value, Colour: TeamColour.Blue),
                                                  (Score: ipc.Score3.Value, Colour: TeamColour.Yellow),
-                                                 (Score: ipc.Score4.Value, Colour: TeamColour.Green)
+                                                 (Score: ipc.Score4.Value, Colour: TeamColour.Green),
                                              }
                                              .OrderByDescending(s => s.Score)
+                                             .ThenBy(s => seedByColour[s.Colour])
                                              .ToList();
 
                         int[] rewards = { 3, 2, 1, 0 };
@@ -338,6 +362,10 @@ namespace osu.Game.Tournament.Screens.Gameplay
                                 slot.Score.Value += reward;
                             }
                         }
+
+                        var lastPick = CurrentMatch.Value.PicksBans.LastOrDefault(p => p.Type == ChoiceType.Pick);
+                        if (lastPick != null)
+                            lastPick.Winner = rankableScores[0].Colour;
                     }
                 }
 

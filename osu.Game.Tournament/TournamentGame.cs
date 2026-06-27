@@ -41,6 +41,9 @@ namespace osu.Game.Tournament
                 case TeamColour.Green:
                     return COLOUR_GREEN;
 
+                case TeamColour.Referee:
+                    return COLOUR_REFEREE;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(teamColour), teamColour, null);
             }
@@ -50,6 +53,7 @@ namespace osu.Game.Tournament
         public static readonly Color4 COLOUR_BLUE = new OsuColour().TeamColourBlue;
         public static readonly Color4 COLOUR_YELLOW = Color4Extensions.FromHex(@"eeaa00");
         public static readonly Color4 COLOUR_GREEN = Color4Extensions.FromHex(@"33cc40");
+        public static readonly Color4 COLOUR_REFEREE = Color4Extensions.FromHex(@"b1b1b1");
 
         public static readonly Color4 ELEMENT_BACKGROUND_COLOUR = Color4Extensions.FromHex("#fff");
         public static readonly Color4 ELEMENT_FOREGROUND_COLOUR = Color4Extensions.FromHex("#000");

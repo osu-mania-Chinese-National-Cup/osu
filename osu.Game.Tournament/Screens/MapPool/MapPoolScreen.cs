@@ -36,8 +36,9 @@ namespace osu.Game.Tournament.Screens.MapPool
         private OsuButton buttonBlueBan = null!;
         private OsuButton buttonRedPick = null!;
         private OsuButton buttonBluePick = null!;
-        private TourneyButton buttonYellowPick = null!;
-        private TourneyButton buttonGreenPick = null!;
+        private OsuButton buttonYellowPick = null!;
+        private OsuButton buttonGreenPick = null!;
+        private OsuButton buttonRefereePick = null!;
 
         private ScheduledDelegate? scheduledScreenChange;
 
@@ -120,6 +121,12 @@ namespace osu.Game.Tournament.Screens.MapPool
                             Text = "Green Pick",
                             Action = () => setMode(TeamColour.Green, ChoiceType.Pick)
                         },
+                        buttonRefereePick = new TourneyButton
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Text = "Referee Pick",
+                            Action = () => setMode(TeamColour.Referee, ChoiceType.Pick)
+                        },
                         new ControlPanel.Spacer(),
                         new TourneyButton
                         {
@@ -178,6 +185,7 @@ namespace osu.Game.Tournament.Screens.MapPool
             buttonBluePick.Colour = setColour(pickColour == TeamColour.Blue && pickType == ChoiceType.Pick);
             buttonYellowPick.Colour = setColour(pickColour == TeamColour.Yellow && pickType == ChoiceType.Pick);
             buttonGreenPick.Colour = setColour(pickColour == TeamColour.Green && pickType == ChoiceType.Pick);
+            buttonRefereePick.Colour = setColour(pickColour == TeamColour.Referee && pickType == ChoiceType.Pick);
 
             static Color4 setColour(bool active) => active ? Color4.White : Color4.Gray;
         }
@@ -228,11 +236,10 @@ namespace osu.Game.Tournament.Screens.MapPool
 
         private void fourTeamsSetNextMode()
         {
-            if (CurrentMatch.Value?.Round.Value == null)
+            if (CurrentMatch.Value == null)
                 return;
 
-            TeamColour lastPickColour = CurrentMatch.Value.PicksBans.LastOrDefault()?.Team ?? TeamColour.Red;
-            TeamColour nextColour = (TeamColour)(((int)lastPickColour + 1) % 4);
+            TeamColour nextColour = CurrentMatch.Value.PicksBans.LastOrDefault(p => p.Type == ChoiceType.Pick)?.Winner ?? TeamColour.Referee;
 
             setMode(nextColour, ChoiceType.Pick);
         }
@@ -305,6 +312,17 @@ namespace osu.Game.Tournament.Screens.MapPool
                     scheduledScreenChange?.Cancel();
                     scheduledScreenChange = Scheduler.AddDelayed(() => { sceneManager?.SetScreen(typeof(GameplayScreen)); }, 10000);
                 }
+            }
+        }
+
+        // 在重新进入图池界面的时候根据上一个pick的数据设置模式
+        public override void Show()
+        {
+            base.Show();
+
+            if (CurrentMatch.Value?.StructureType.Value == MatchStructureType.FourTeams)
+            {
+                setNextMode();
             }
         }
 

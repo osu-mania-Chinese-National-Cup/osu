@@ -19,6 +19,9 @@ namespace osu.Game.Tournament.Models
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public ChoiceType Type;
 
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
+        public TeamColour Winner;
+
         public int BeatmapID;
     }
 
@@ -29,6 +32,7 @@ namespace osu.Game.Tournament.Models
         Blue,
         Yellow,
         Green,
+        Referee
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
