@@ -18,6 +18,10 @@ namespace osu.Game.Tournament.Components
     {
         private readonly Bindable<int> channelName = new Bindable<int>();
 
+        private readonly Bindable<long> currentChannelId = new Bindable<long>();
+
+        public IBindable<long> CurrentChannelId => currentChannelId;
+
         private ChannelManager? manager;
 
         [Resolved]
@@ -54,7 +58,31 @@ namespace osu.Game.Tournament.Components
 
                 manager.JoinChannel(channel);
                 manager.CurrentChannel.Value = channel;
-            }, true);
+            });
+
+            manager.CurrentChannel.BindValueChanged(channel =>
+            {
+                currentChannelId.Value = channel.NewValue?.Id ?? -1;
+            });
+        }
+
+        public void Join(long channelId)
+        {
+            if (manager == null)
+                return;
+
+            var joinedChannel = manager.JoinedChannels.SingleOrDefault(ch => ch.Id == channelId);
+            if (joinedChannel != null)
+                manager.LeaveChannel(joinedChannel);
+
+            var channel = new Channel
+            {
+                Id = channelId,
+                Type = ChannelType.Public
+            };
+
+            manager.JoinChannel(channel);
+            manager.CurrentChannel.Value = channel;
         }
 
         public void Expand() => this.FadeIn(300);

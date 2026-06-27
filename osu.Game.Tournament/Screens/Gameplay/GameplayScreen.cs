@@ -177,9 +177,23 @@ namespace osu.Game.Tournament.Screens.Gameplay
                                 Text = "目前的渲染器不是D3D11，无法使用WGC捕捉，已回滚至bitblt，可能会有延迟或者性能损失"
                             }
                             : Empty(),
+                        chatChannelTextBox = new LabelledNumberBox
+                        {
+                            Label = "chat channel id",
+                        }
                     }
                 }
             });
+
+            chatChannelTextBox.OnCommit += (textBox, _) =>
+            {
+                if (long.TryParse(textBox.Text, out long channelId))
+                {
+                    chat.Join(channelId);
+                }
+            };
+
+            chat.CurrentChannelId.BindValueChanged(id => chatChannelTextBox.Text = id.NewValue.ToString());
 
             State.BindValueChanged(state => chatToggle.Current.Value = State.Value == TourneyState.Idle, true);
             chatToggle.Current.BindValueChanged(v => State.Value = v.NewValue ? TourneyState.Idle : TourneyState.Playing);
@@ -229,6 +243,7 @@ namespace osu.Game.Tournament.Screens.Gameplay
         private MatchHeader header = null!;
         private FourTeamScoreDisplay fourTeamScoreDisplay = null!;
         private SettingsNumberBox? frameRateInputBox;
+        private LabelledNumberBox chatChannelTextBox;
 
         private void contract()
         {
