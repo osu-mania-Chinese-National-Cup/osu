@@ -254,6 +254,11 @@ namespace osu.Game
         /// </remarks>
         protected virtual int UnhandledExceptionsBeforeCrash => DebugUtils.IsDebugBuild ? 0 : 1;
 
+        /// <summary>
+        /// To achieve multiple instances in the tournament without affecting session state.
+        /// </summary>
+        public bool ConnectToOsuWebOnly { get; init; } = false;
+
         public OsuGameBase()
         {
             Name = GAME_NAME;

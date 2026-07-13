@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Runtime.Versioning;
 using osu.Desktop.LegacyIpc;
-using osu.Desktop.Windows;
 using osu.Framework;
 using osu.Framework.Development;
 using osu.Framework.Logging;
@@ -73,6 +72,7 @@ namespace osu.Desktop
 
             string gameName = base_game_name;
             bool tournamentClient = false;
+            bool osuWebOnly = false;
 
             foreach (string arg in args)
             {
@@ -96,6 +96,10 @@ namespace osu.Desktop
 
                         gameName = $"{base_game_name}-{clientID}";
                         break;
+
+                    case "--osu-web-only":
+                        osuWebOnly = true;
+                        break;
                 }
             }
 
@@ -107,7 +111,7 @@ namespace osu.Desktop
 
             using (DesktopGameHost host = Host.GetSuitableDesktopHost(gameName, hostOptions))
             {
-                if (!host.IsPrimaryInstance)
+                if (!host.IsPrimaryInstance && !osuWebOnly)
                 {
                     if (trySendIPCMessage(host, cwd, args))
                         return;
@@ -138,7 +142,8 @@ namespace osu.Desktop
                 {
                     host.Run(new TournamentGame
                     {
-                        IsFirstRun = isFirstRun
+                        IsFirstRun = isFirstRun,
+                        ConnectToOsuWebOnly = osuWebOnly,
                     });
                 }
                 else
@@ -147,6 +152,7 @@ namespace osu.Desktop
                     {
                         IsFirstRun = isFirstRun,
                         EnableWebSocketServer = Environment.GetEnvironmentVariable("OSU_WEBSOCKET_SERVER") == "1",
+                        ConnectToOsuWebOnly = osuWebOnly,
                     });
                 }
             }
