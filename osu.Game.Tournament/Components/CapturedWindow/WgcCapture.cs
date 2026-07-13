@@ -10,19 +10,20 @@ using Windows.Graphics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.DirectX.Direct3D11;
-using WinRT;
 using osu.Framework.Extensions.ObjectExtensions;
 using SharpGen.Runtime;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
+using WinRT;
 
-namespace osu.Game.Tournament.Components
+namespace osu.Game.Tournament.Components.CapturedWindow
 {
     [SupportedOSPlatform("windows10.0.26100.0")]
     public sealed class WgcCapture : IDisposable
     {
         private const int frame_buffer_count = 2;
 
+        // ReSharper disable once InconsistentNaming
         private readonly ID3D11Device d3dDevice;
         private readonly IDirect3DDevice winrtDevice;
 

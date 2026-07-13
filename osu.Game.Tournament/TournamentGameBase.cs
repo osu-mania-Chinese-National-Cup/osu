@@ -20,6 +20,7 @@ using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Online;
 using osu.Game.Online.API.Requests;
+using osu.Game.Tournament.Components.CapturedWindow;
 using osu.Game.Tournament.Configuration;
 using osu.Game.Tournament.Github;
 using osu.Game.Tournament.IO;
@@ -40,6 +41,7 @@ namespace osu.Game.Tournament
         private FileBasedIPC ipc = null!;
         private BeatmapLookupCache beatmapCache = null!;
         private TournamentConfigManager configManager = null!;
+        private TournamentCaptureManager captureManager = null!;
 
         [Resolved]
         private GameHost host { get; set; } = null!;
@@ -154,6 +156,10 @@ namespace osu.Game.Tournament
             Add(bracketDownloader = new BracketDownloader());
             Add(bracketUploader = new BracketUploader());
             dependencies.Cache(bracketUploader);
+
+            Add(captureManager = new TournamentCaptureManager());
+            dependencies.Cache(captureManager);
+            captureManager.RefreshAsync();
 
             if (IsFirstRun)
                 LocalConfig.SetValue(OsuSetting.ReleaseStream, ReleaseStream.Mcnc);

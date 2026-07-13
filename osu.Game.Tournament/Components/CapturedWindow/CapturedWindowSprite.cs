@@ -24,35 +24,35 @@ using SixLabors.ImageSharp.PixelFormats;
 using Vortice.Direct3D11;
 using FillMode = osu.Framework.Graphics.FillMode;
 
-namespace osu.Game.Tournament.Components
+namespace osu.Game.Tournament.Components.CapturedWindow
 {
     [SupportedOSPlatform("windows10.0.26100.0")]
     public partial class CapturedWindowSprite : CompositeDrawable
     {
         private Sprite sprite = null!;
-        private readonly string targetWindowTitle;
+        private CaptureTarget? captureTarget;
         private ICaptureSource? capture;
         private D3D11ExternalTexture? externalTexture;
         private Texture? cpuTexture;
-        private IntPtr targetHwnd;
+
+        // ReSharper disable once InconsistentNaming
         private bool d3d11Available;
-        private Thread? windowWatcherThread;
-        private volatile bool watcherRunning;
-        private IntPtr watchedHwnd;
-        private volatile bool watchedAlive;
         private Texture? pendingSpriteTexture;
         private volatile bool spriteTextureAssignmentsStopped;
 
-        private bool isWindowsLive = false;
+        public int Index { get; }
 
         [Resolved]
         private LadderInfo? ladder { get; set; }
 
-        public CapturedWindowSprite(string windowTitle)
+        [Resolved]
+        private TournamentCaptureManager manager { get; set; } = null!;
+
+        public CapturedWindowSprite(int index)
         {
+            Index = index;
             Masking = true;
             AlwaysPresent = true;
-            targetWindowTitle = windowTitle;
             RelativeSizeAxes = Axes.Both;
             Alpha = 0;
         }
@@ -65,8 +65,6 @@ namespace osu.Game.Tournament.Components
                 RelativeSizeAxes = Axes.Both,
                 FillMode = FillMode.Fit
             };
-
-            Name = $"WindowCapture<{targetWindowTitle}>";
 
             AddInternal(sprite);
 
@@ -82,14 +80,59 @@ namespace osu.Game.Tournament.Components
             else
                 capture = new BitBltCaptureSource();
 
-            watcherRunning = true;
-            windowWatcherThread = new Thread(watchWindowLoop)
-            {
-                IsBackground = true,
-                Name = $"WindowWatcher<{targetWindowTitle}>"
-            };
-            windowWatcherThread.Start();
+            manager.RegisterCapture(this);
         }
+
+        public void SetTarget(CaptureTarget? newTarget) => Scheduler.Add(() =>
+        {
+            if (captureTarget == newTarget)
+                return;
+
+            captureTarget = newTarget;
+
+            Name = $"WindowCapture<{captureTarget?.ProcessId}>";
+
+            if (capture == null)
+                return;
+
+            if (captureTarget == null)
+            {
+                capture.Stop();
+                return;
+            }
+
+            if (capture.IsRunning)
+            {
+                capture.Stop();
+                sprite.Texture = null;
+                externalTexture = null;
+                cpuTexture = null;
+            }
+
+            if (IsWindow(captureTarget.WindowHandle))
+            {
+                try
+                {
+                    capture.StartForWindow(captureTarget.WindowHandle);
+                    captureTarget.IsAlive = true;
+                    captureErrorReported = false;
+                }
+                catch (Exception e)
+                {
+                    if (!captureErrorReported)
+                    {
+                        Logger.Error(e, $"{nameof(CapturedWindowSprite)}: Process Id {captureTarget.ProcessId} Capture Error");
+                        captureErrorReported = true;
+                    }
+
+                    captureTarget.IsAlive = false;
+                }
+            }
+            else
+            {
+                captureTarget.IsAlive = false;
+            }
+        });
 
         [Resolved]
         private IRenderer renderer { get; set; } = null!;
@@ -103,6 +146,8 @@ namespace osu.Game.Tournament.Components
 
         private bool captureErrorReported;
 
+        private double aliveCheckElapsed;
+
         protected override void Update()
         {
             base.Update();
@@ -110,45 +155,40 @@ namespace osu.Game.Tournament.Components
             if (capture == null)
                 return;
 
-            if (targetHwnd == IntPtr.Zero || !IsWindow(targetHwnd) || !isWindowsLive)
-            {
-                if (capture.IsRunning)
-                    capture.Stop();
-
-                targetHwnd = watchedHwnd;
-
-                if (targetHwnd != IntPtr.Zero && watchedAlive)
-                {
-                    try
-                    {
-                        capture.StartForWindow(targetHwnd);
-                        isWindowsLive = true;
-                        captureErrorReported = false;
-                    }
-                    catch (Exception e)
-                    {
-                        if (!captureErrorReported)
-                        {
-                            Logger.Error(e, $"{targetWindowTitle} Capture Error");
-                            captureErrorReported = true;
-                        }
-
-                        isWindowsLive = false;
-                    }
-                }
-                else
-                {
-                    isWindowsLive = false;
-                }
-            }
-
-            if (!isWindowsLive)
+            if (captureTarget == null)
             {
                 this.FadeOut(100);
                 return;
             }
 
-            this.FadeIn(100);
+            aliveCheckElapsed += Clock.ElapsedFrameTime;
+
+            if (aliveCheckElapsed > 500)
+            {
+                if (captureTarget.IsAlive &&
+                    !IsWindow(captureTarget.WindowHandle))
+                {
+                    captureTarget.IsAlive = false;
+
+                    if (capture?.IsRunning == true)
+                        capture.Stop();
+
+                    sprite.Texture = null;
+                    externalTexture = null;
+                    cpuTexture = null;
+                }
+
+                aliveCheckElapsed = 0;
+            }
+
+            if (!captureTarget.IsAlive)
+            {
+                this.FadeOut(100);
+            }
+            else
+            {
+                this.FadeIn(100);
+            }
         }
 
         private void consumePendingFrame(CaptureFrame frame, IRenderer renderer)
@@ -157,10 +197,10 @@ namespace osu.Game.Tournament.Components
                 return;
 
             bool resourceOwnershipTransferred = false;
-            Texture? textureToApply = null;
 
             try
             {
+                Texture? textureToApply = null;
                 resourceOwnershipTransferred = capture.ApplyFrame(frame, renderer, ref externalTexture, ref cpuTexture, out textureToApply);
 
                 if (textureToApply != null)
@@ -243,41 +283,6 @@ namespace osu.Game.Tournament.Components
             }
         }
 
-        private void watchWindowLoop()
-        {
-            while (watcherRunning)
-            {
-                try
-                {
-                    IntPtr hwnd = watchedHwnd;
-
-                    if (hwnd != IntPtr.Zero && !IsWindow(hwnd))
-                    {
-                        watchedHwnd = IntPtr.Zero;
-                        watchedAlive = false;
-                    }
-
-                    if (watchedHwnd == IntPtr.Zero)
-                    {
-                        hwnd = FindWindowByPartialTitle(targetWindowTitle);
-                        watchedHwnd = hwnd;
-                        watchedAlive = hwnd != IntPtr.Zero;
-                    }
-                    else
-                    {
-                        watchedAlive = true;
-                    }
-                }
-                catch
-                {
-                    watchedHwnd = IntPtr.Zero;
-                    watchedAlive = false;
-                }
-
-                Thread.Sleep(500);
-            }
-        }
-
         protected override void Dispose(bool isDisposing)
         {
             var captureToDispose = capture;
@@ -290,9 +295,6 @@ namespace osu.Game.Tournament.Components
             captureToDispose?.Dispose();
             externalTexture?.Dispose();
             cpuTexture?.Dispose();
-
-            watcherRunning = false;
-            windowWatcherThread?.Join();
         }
 
         #region Windows API
