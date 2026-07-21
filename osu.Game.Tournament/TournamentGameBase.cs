@@ -450,6 +450,11 @@ namespace osu.Game.Tournament
                                             ladder.Matches.Where(p => p.LosersProgression.Value != null).Select(p => new TournamentProgression(p.ID, p.LosersProgression.Value.AsNonNull().ID, true)))
                                         .ToList();
 
+            foreach (var m in ladder.Matches)
+            {
+                m.Date.Value = m.Date.Value.ToUniversalTime();
+            }
+
             return JsonConvert.SerializeObject(ladder,
                 new JsonSerializerSettings
                 {
