@@ -37,7 +37,6 @@ namespace osu.Game.Tournament.Components
         private void load(MatchIPCInfo ipc, IAPIProvider api)
         {
             AddInternal(manager = new ChannelManager(api));
-            Channel.BindTo(manager.CurrentChannel);
 
             channelName.BindTo(ipc.ChatChannel);
             channelName.BindValueChanged(c =>
@@ -57,8 +56,7 @@ namespace osu.Game.Tournament.Components
                         Type = ChannelType.Public
                     };
 
-                    manager.JoinChannel(channel);
-                    manager.CurrentChannel.Value = channel;
+                    Channel.Value = manager.JoinChannel(channel);
                 }
             }, true);
         }
