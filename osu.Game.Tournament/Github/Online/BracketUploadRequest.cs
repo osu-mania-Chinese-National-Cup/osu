@@ -61,6 +61,8 @@ namespace osu.Game.Tournament.Github.Online
             if (!string.IsNullOrWhiteSpace(providedUsername))
                 req.AddHeader("X-Osu-Username", providedUsername);
 
+            req.Timeout = 30_000;
+
             return req;
         }
 
