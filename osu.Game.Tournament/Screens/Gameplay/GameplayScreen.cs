@@ -185,6 +185,16 @@ namespace osu.Game.Tournament.Screens.Gameplay
                             Text = "Refresh list",
                             Action = captureManager.RefreshAsync
                         },
+                        new TourneyButton
+                        {
+                            Text = "Enable stable always on top",
+                            Action = () => captureManager.SetAlwaysOnTop(true)
+                        },
+                        new TourneyButton
+                        {
+                            Text = "Disable stable always on top",
+                            Action = () => captureManager.SetAlwaysOnTop(false)
+                        }
                     }
                 }
             });
