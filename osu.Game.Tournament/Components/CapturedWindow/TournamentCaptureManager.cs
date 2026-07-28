@@ -176,6 +176,22 @@ namespace osu.Game.Tournament.Components.CapturedWindow
             return int.TryParse(title.AsSpan(client_window_prefix.Length), out int index) ? index : -1;
         }
 
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+
+        public bool SetAlwaysOnTop(bool alwaysOnTop)
+        {
+            if (SelectedManager.Value == null)
+                return false;
+
+            foreach (var client in SelectedManager.Value.Instance.Clients)
+            {
+                setAlwaysOnTop(client.WindowHandle, alwaysOnTop);
+            }
+
+            return true;
+        }
+
         #region Windows API
 
         private static IEnumerable<IntPtr> findWindowsByTitle(string title)
@@ -253,6 +269,35 @@ namespace osu.Game.Tournament.Components.CapturedWindow
             }
 
             return false;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(
+            IntPtr hWnd,
+            IntPtr hWndInsertAfter,
+            int x,
+            int y,
+            int cx,
+            int cy,
+            uint flags);
+
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOACTIVATE = 0x0010;
+
+        private static bool setAlwaysOnTop(IntPtr hwnd, bool enabled)
+        {
+            if (hwnd == IntPtr.Zero)
+                throw new ArgumentException("Invalid hwnd", nameof(hwnd));
+
+            return SetWindowPos(
+                hwnd,
+                enabled ? HWND_TOPMOST : HWND_NOTOPMOST,
+                0,
+                0,
+                0,
+                0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         }
     }
 }
